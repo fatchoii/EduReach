@@ -1,0 +1,13 @@
+export { ParentDashboard, ParentDashboard as PDash } from './parent/ParentDashboard';
+export { Auth } from './public/Auth';
+export { Landing } from './public/Landing';
+export { Notifications } from './shared/Notifications';
+export { Profile } from './shared/Profile';
+export { Analytics } from './teacher/Analytics';
+export { Assignments } from './teacher/Assignments';
+export { Classes } from './teacher/Classes';
+export { Lessons } from './teacher/Lessons';
+export { QuestionBank, QuestionBank as QBank } from './teacher/QuestionBank';
+export { Submissions } from './teacher/Submissions';
+export { TeacherDashboard, TeacherDashboard as TDash } from './teacher/TeacherDashboard';
+export { Worksheets } from './teacher/Worksheets';
