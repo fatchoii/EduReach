@@ -1,16 +1,273 @@
-export const SKILLS=['Addition','Addition with Regrouping','Subtraction','Subtraction with Borrowing','Borrowing Across Zero'];
-export const students=[['Ana Reyes',[95,80,90,70,62]],['Ben Lopez',[88,70,84,60,50]],['Carla Tan',[98,92,95,85,78]],['Dan Cruz',[80,58,72,48,35]],['Ella Go',[92,85,88,75,66]],['Finn Uy',[85,66,80,55,44]]].map(([name,m],i)=>({id:i+1,name,m,overall:Math.round(m.reduce((a,b)=>a+b)/5)}));
-export const classes=[{id:1,name:'Grade 3 - Sampaguita',grade:3,students:students},{id:2,name:'Grade 3 - Orchid',grade:3,students:students.slice(0,4)}];
-export const classAvg=c=>Math.round(c.students.reduce((a,s)=>a+s.overall,0)/c.students.length);
-export const modules=['Basic Addition','Addition with Regrouping','Basic Subtraction','Subtraction with Borrowing','Borrowing Across Zero'].map((t,i)=>({id:i+1,title:t,skill:SKILLS[i]}));
-export const lessons0=[{id:1,module:1,title:'Adding Two-Digit Numbers',desc:'Add tens and ones.',instructions:'Use the number line to add tens, then ones.',questions:'23 + 15 = ?',status:'Published'},{id:2,module:2,title:'Carrying to the Tens',desc:'Regroup 10 ones as 1 ten.',instructions:'Use base-10 blocks to regroup.',questions:'36 + 28 = ?',status:'Published'},{id:3,module:4,title:'Borrowing from the Tens',desc:'Trade 1 ten for 10 ones.',instructions:'Break a ten rod into 10 ones.',questions:'72 - 38 = ?',status:'Draft'}];
-export const questions0=[['23 + 15 = ?',38,0,'Easy'],['45 + 32 = ?',77,0,'Easy'],['36 + 28 = ?',64,1,'Medium'],['57 + 39 = ?',96,1,'Hard'],['68 - 25 = ?',43,2,'Easy'],['45 - 17 = ?',28,3,'Medium'],['72 - 38 = ?',34,3,'Medium'],['60 - 27 = ?',33,4,'Medium'],['300 - 148 = ?',152,4,'Hard'],['405 - 167 = ?',238,4,'Hard']].map(([q,a,s,d],i)=>({id:i+1,q,a,skill:SKILLS[s],diff:d}));
-export const assignments0=[{id:1,name:'Regrouping Practice 1',skill:SKILLS[1],cls:'Grade 3 - Sampaguita',assigned:6,done:83,due:'2026-10-05',status:'Active'},{id:2,name:'Borrowing Basics',skill:SKILLS[3],cls:'Grade 3 - Orchid',assigned:4,done:100,due:'2026-09-25',status:'Completed'},{id:3,name:'Across Zero Challenge',skill:SKILLS[4],cls:'Grade 3 - Sampaguita',assigned:6,done:33,due:'2026-09-26',status:'Overdue'},{id:4,name:'Quick Addition Review',skill:SKILLS[0],cls:'Grade 3 - Orchid',assigned:4,done:0,due:'2026-10-12',status:'Draft'}];
-export const submissions=[{id:1,student:'Dan Cruz',assignment:'Borrowing Basics',score:'2/4',date:'2026-09-24',status:'Graded',items:[['45 - 28 = ?',27,17,SKILLS[3]],['72 - 38 = ?',34,34,SKILLS[3]],['60 - 27 = ?',47,33,SKILLS[3]],['81 - 46 = ?',35,35,SKILLS[3]]]},{id:2,student:'Ben Lopez',assignment:'Across Zero Challenge',score:'1/3',date:'2026-09-27',status:'Needs Review',items:[['300 - 148 = ?',162,152,SKILLS[4]],['405 - 167 = ?',238,238,SKILLS[4]],['200 - 76 = ?',134,124,SKILLS[4]]]},{id:3,student:'Carla Tan',assignment:'Regrouping Practice 1',score:'4/4',date:'2026-09-28',status:'Graded',items:[['36 + 28 = ?',64,64,SKILLS[1]],['47 + 35 = ?',82,82,SKILLS[1]],['59 + 24 = ?',83,83,SKILLS[1]],['68 + 17 = ?',85,85,SKILLS[1]]]}];
-export const notifs={teacher:[['New submission from Ben Lopez','Across Zero Challenge','2h ago',0],['Deadline approaching','Regrouping Practice 1 is due in 6 days','5h ago',0],['Assignment completed','Borrowing Basics: all students done','1d ago',1],['Progress update','Ana Reyes improved in Subtraction','2d ago',1]],parent:[['Ana completed practice','Regrouping Practice 1','1h ago',0],['New assignment','Borrowing Basics was assigned','1d ago',0],['Practice reminder','15 minutes of borrowing practice today','2d ago',1],['Progress update','Ana is at 79% overall mastery','3d ago',1]]};
-export const activity=['Carla Tan completed Regrouping Practice 1','Ben Lopez submitted Across Zero Challenge','New assignment created: Quick Addition Review','Progress updated: Ella Go in Subtraction'];
-const r=n=>Math.floor(Math.random()*n);
-export function gen(skill,diff,n){const k=SKILLS.indexOf(skill),m=diff==='Easy'?1:diff==='Medium'?1.6:2;return Array.from({length:n},()=>{let a,b,op='+';
-if(k<2){a=10+r(40*m);b=10+r(40*m);if(k===1)while((a%10)+(b%10)<10){a=10+r(40*m);b=10+r(40*m);}}
-else{op='-';if(k===4){a=(1+r(4))*100;b=11+r(a-20);}else{a=30+r(60*m);b=10+r(a-15);if(k===3&&a%10>=b%10){b=b+(a%10-b%10)+1;}if(b>=a)b=a-1;}}
-return{q:`${a} ${op} ${b} = ?`,a:op==='+'?a+b:a-b};});}
+
+// Available Skills
+export const SKILLS = [
+  'Addition',
+  'Addition with Regrouping',
+  'Subtraction',
+  'Subtraction with Borrowing',
+  'Borrowing Across Zero'
+];
+
+// Student Data
+export const students = [
+  ['Ana Reyes', [95, 80, 90, 70, 62]],
+  ['Ben Lopez', [88, 70, 84, 60, 50]],
+  ['Carla Tan', [98, 92, 95, 85, 78]],
+  ['Dan Cruz', [80, 58, 72, 48, 35]],
+  ['Ella Go', [92, 85, 88, 75, 66]],
+  ['Finn Uy', [85, 66, 80, 55, 44]]
+].map(([name, m], i) => ({
+  id: i + 1,
+  name,
+  m,
+  overall: Math.round(m.reduce((a, b) => a + b) / 5)
+}));
+
+// Class Data
+export const classes = [
+  {
+    id: 1,
+    name: 'Grade 3 - Sampaguita',
+    grade: 3,
+    students: students
+  },
+  {
+    id: 2,
+    name: 'Grade 3 - Orchid',
+    grade: 3,
+    students: students.slice(0, 4)
+  }
+];
+
+// Calculate Class Average
+export const classAvg = (c) =>
+  Math.round(
+    c.students.reduce((a, s) => a + s.overall, 0) /
+    c.students.length
+  );
+
+// Learning Modules
+export const modules = [
+  'Basic Addition',
+  'Addition with Regrouping',
+  'Basic Subtraction',
+  'Subtraction with Borrowing',
+  'Borrowing Across Zero'
+].map((t, i) => ({
+  id: i + 1,
+  title: t,
+  skill: SKILLS[i]
+}));
+
+// Lesson Data
+export const lessons0 = [
+  {
+    id: 1,
+    module: 1,
+    title: 'Adding Two-Digit Numbers',
+    desc: 'Add tens and ones.',
+    instructions: 'Use the number line to add tens, then ones.',
+    questions: '23 + 15 = ?',
+    status: 'Published'
+  },
+  {
+    id: 2,
+    module: 2,
+    title: 'Carrying to the Tens',
+    desc: 'Regroup 10 ones as 1 ten.',
+    instructions: 'Use base-10 blocks to regroup.',
+    questions: '36 + 28 = ?',
+    status: 'Published'
+  },
+  {
+    id: 3,
+    module: 4,
+    title: 'Borrowing from the Tens',
+    desc: 'Trade 1 ten for 10 ones.',
+    instructions: 'Break a ten rod into 10 ones.',
+    questions: '72 - 38 = ?',
+    status: 'Draft'
+  }
+];
+
+// Question Bank
+export const questions0 = [
+  ['23 + 15 = ?', 38, 0, 'Easy'],
+  ['45 + 32 = ?', 77, 0, 'Easy'],
+  ['36 + 28 = ?', 64, 1, 'Medium'],
+  ['57 + 39 = ?', 96, 1, 'Hard'],
+  ['68 - 25 = ?', 43, 2, 'Easy'],
+  ['45 - 17 = ?', 28, 3, 'Medium'],
+  ['72 - 38 = ?', 34, 3, 'Medium'],
+  ['60 - 27 = ?', 33, 4, 'Medium'],
+  ['300 - 148 = ?', 152, 4, 'Hard'],
+  ['405 - 167 = ?', 238, 4, 'Hard']
+].map(([q, a, s, d], i) => ({
+  id: i + 1,
+  q,
+  a,
+  skill: SKILLS[s],
+  diff: d
+}));
+
+// Assignment Data
+export const assignments0 = [
+  {
+    id: 1,
+    name: 'Regrouping Practice 1',
+    skill: SKILLS[1],
+    cls: 'Grade 3 - Sampaguita',
+    assigned: 6,
+    done: 83,
+    due: '2026-10-05',
+    status: 'Active'
+  },
+  {
+    id: 2,
+    name: 'Borrowing Basics',
+    skill: SKILLS[3],
+    cls: 'Grade 3 - Orchid',
+    assigned: 4,
+    done: 100,
+    due: '2026-09-25',
+    status: 'Completed'
+  },
+  {
+    id: 3,
+    name: 'Across Zero Challenge',
+    skill: SKILLS[4],
+    cls: 'Grade 3 - Sampaguita',
+    assigned: 6,
+    done: 33,
+    due: '2026-09-26',
+    status: 'Overdue'
+  },
+  {
+    id: 4,
+    name: 'Quick Addition Review',
+    skill: SKILLS[0],
+    cls: 'Grade 3 - Orchid',
+    assigned: 4,
+    done: 0,
+    due: '2026-10-12',
+    status: 'Draft'
+  }
+];
+
+// Student Submissions
+export const submissions = [
+  {
+    id: 1,
+    student: 'Dan Cruz',
+    assignment: 'Borrowing Basics',
+    score: '2/4',
+    date: '2026-09-24',
+    status: 'Graded',
+    items: [
+      ['45 - 28 = ?', 27, 17, SKILLS[3]],
+      ['72 - 38 = ?', 34, 34, SKILLS[3]],
+      ['60 - 27 = ?', 47, 33, SKILLS[3]],
+      ['81 - 46 = ?', 35, 35, SKILLS[3]]
+    ]
+  },
+  {
+    id: 2,
+    student: 'Ben Lopez',
+    assignment: 'Across Zero Challenge',
+    score: '1/3',
+    date: '2026-09-27',
+    status: 'Needs Review',
+    items: [
+      ['300 - 148 = ?', 162, 152, SKILLS[4]],
+      ['405 - 167 = ?', 238, 238, SKILLS[4]],
+      ['200 - 76 = ?', 134, 124, SKILLS[4]]
+    ]
+  },
+  {
+    id: 3,
+    student: 'Carla Tan',
+    assignment: 'Regrouping Practice 1',
+    score: '4/4',
+    date: '2026-09-28',
+    status: 'Graded',
+    items: [
+      ['36 + 28 = ?', 64, 64, SKILLS[1]],
+      ['47 + 35 = ?', 82, 82, SKILLS[1]],
+      ['59 + 24 = ?', 83, 83, SKILLS[1]],
+      ['68 + 17 = ?', 85, 85, SKILLS[1]]
+    ]
+  }
+];
+
+// Notifications
+export const notifs = {
+  teacher: [
+    ['New submission from Ben Lopez', 'Across Zero Challenge', '2h ago', 0],
+    ['Deadline approaching', 'Regrouping Practice 1 is due in 6 days', '5h ago', 0],
+    ['Assignment completed', 'Borrowing Basics: all students done', '1d ago', 1],
+    ['Progress update', 'Ana Reyes improved in Subtraction', '2d ago', 1]
+  ],
+
+  parent: [
+    ['Ana completed practice', 'Regrouping Practice 1', '1h ago', 0],
+    ['New assignment', 'Borrowing Basics was assigned', '1d ago', 0],
+    ['Practice reminder', '15 minutes of borrowing practice today', '2d ago', 1],
+    ['Progress update', 'Ana is at 79% overall mastery', '3d ago', 1]
+  ]
+};
+
+// Recent Activity
+export const activity = [
+  'Carla Tan completed Regrouping Practice 1',
+  'Ben Lopez submitted Across Zero Challenge',
+  'New assignment created: Quick Addition Review',
+  'Progress updated: Ella Go in Subtraction'
+];
+
+// Random Number Generator
+const r = (n) => Math.floor(Math.random() * n);
+
+// Generate Math Questions
+export function gen(skill, diff, n) {
+  const k = SKILLS.indexOf(skill);
+  const m = diff === 'Easy' ? 1 : diff === 'Medium' ? 1.6 : 2;
+
+  return Array.from({ length: n }, () => {
+    let a, b, op = '+';
+
+    if (k < 2) {
+      a = 10 + r(40 * m);
+      b = 10 + r(40 * m);
+
+      if (k === 1) {
+        while ((a % 10) + (b % 10) < 10) {
+          a = 10 + r(40 * m);
+          b = 10 + r(40 * m);
+        }
+      }
+    } else {
+      op = '-';
+
+      if (k === 4) {
+        a = (1 + r(4)) * 100;
+        b = 11 + r(a - 20);
+      } else {
+        a = 30 + r(60 * m);
+        b = 10 + r(a - 15);
+
+        if (k === 3 && a % 10 >= b % 10) {
+          b = b + (a % 10 - b % 10) + 1;
+        }
+
+        if (b >= a) {
+          b = a - 1;
+        }
+      }
+    }
+
+    return {
+      q: `${a} ${op} ${b} = ?`,
+      a: op === '+' ? a + b : a - b
+    };
+  });
+}

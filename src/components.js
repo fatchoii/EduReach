@@ -1,17 +1,247 @@
-import React,{useState} from 'react';import {NavLink,Link} from 'react-router-dom';
-export const Button=({v='primary',...p})=><button {...p} className={`btn ${v} ${p.className||''}`}/>;
-export const FormInput=({label,children,...p})=><label className="fi"><span>{label}</span>{children||<input {...p}/>}</label>;
-export const Card=({title,children,right})=><section className="card">{title&&<div className="ch"><h3>{title}</h3>{right}</div>}{children}</section>;
-export const DashboardCard=({label,value,icon})=><div className="card stat"><span className="ic">{icon}</span><div><b>{value}</b><small>{label}</small></div></div>;
-const col=v=>v>=80?'#2e9e6b':v>=65?'#e0a020':'#d9534f';
-export const ProgressBar=({value,label})=><div className="pb">{label&&<small>{label}<b>{value}%</b></small>}<div><i style={{width:value+'%',background:col(value)}}/></div></div>;
-export const SkillCard=({skill,value})=><div className="card"><ProgressBar label={skill} value={value}/></div>;
-export const Chart=({data})=><div className="chart">{data.map(([l,v])=><div key={l}><i style={{height:v+'%',background:col(v)}}><b>{v}%</b></i><small>{l}</small></div>)}</div>;
-export const DataTable=({cols,rows,onRow})=><div className="tw"><table><thead><tr>{cols.map(c=><th key={c}>{c}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={i} onClick={onRow&&(()=>onRow(i))} className={onRow?'click':''}>{r.map((c,j)=><td key={j} data-l={cols[j]}>{c}</td>)}</tr>)}</tbody></table></div>;
-export const Modal=({title,onClose,children})=><div className="mo" onClick={onClose}><div className="md" onClick={e=>e.stopPropagation()}><div className="ch"><h3>{title}</h3><Button v="ghost" onClick={onClose}>✕</Button></div>{children}</div></div>;
-export const Badge=({t})=><span className={`bd ${t.replace(/\s/g,'')}`}>{t}</span>;
-export const NotificationItem=({n,onClick})=><div className={`ni ${n[3]?'':'unread'}`} onClick={onClick}><span className="dot"/><div><b>{n[0]}</b><p>{n[1]}</p></div><small>{n[2]}</small></div>;
-export const AssignmentCard=({a})=><div className="card"><div className="ch"><h4>{a.name}</h4><Badge t={a.status}/></div><small>{a.skill} · {a.cls}</small><ProgressBar value={a.done} label="Completion"/><small>Due {a.due}</small></div>;
-export const LessonCard=({l,active,onClick})=><div className={`lc ${active?'on':''}`} onClick={onClick}><b>{l.title}</b><small>{l.desc}</small><Badge t={l.status}/></div>;
-export const Navbar=({onMenu,user,onLogout})=><header className="top"><Button v="ghost" className="burger" onClick={onMenu}>☰</Button><Link to="/" className="logo">➕➖ EduReach</Link><span className="sp"/><small>{user?.name} ({user?.role})</small><Button v="ghost" onClick={onLogout}>Logout</Button></header>;
-export const Sidebar=({items,open,close})=><nav className={`side ${open?'open':''}`}>{items.map(([p,l,i])=><NavLink key={p} to={p} onClick={close}>{i} {l}</NavLink>)}</nav>;
+
+import React, { useState } from 'react';
+import { NavLink, Link } from 'react-router-dom';
+
+// Button Component
+export const Button = ({ v = 'primary', ...p }) => (
+  <button
+    {...p}
+    className={`btn ${v} ${p.className || ''}`}
+  />
+);
+
+// Form Input Component
+export const FormInput = ({ label, children, ...p }) => (
+  <label className="fi">
+    <span>{label}</span>
+    {children || <input {...p} />}
+  </label>
+);
+
+// Card Component
+export const Card = ({ title, children, right }) => (
+  <section className="card">
+    {title && (
+      <div className="ch">
+        <h3>{title}</h3>
+        {right}
+      </div>
+    )}
+    {children}
+  </section>
+);
+
+// Dashboard Statistics Card
+export const DashboardCard = ({ label, value, icon }) => (
+  <div className="card stat">
+    <span className="ic">{icon}</span>
+    <div>
+      <b>{value}</b>
+      <small>{label}</small>
+    </div>
+  </div>
+);
+
+// Progress Bar Color
+const col = (v) =>
+  v >= 80
+    ? '#2e9e6b'
+    : v >= 65
+      ? '#e0a020'
+      : '#d9534f';
+
+// Progress Bar Component
+export const ProgressBar = ({ value, label }) => (
+  <div className="pb">
+    {label && (
+      <small>
+        {label}
+        <b>{value}%</b>
+      </small>
+    )}
+
+    <div>
+      <i
+        style={{
+          width: value + '%',
+          background: col(value)
+        }}
+      />
+    </div>
+  </div>
+);
+
+// Skill Card Component
+export const SkillCard = ({ skill, value }) => (
+  <div className="card">
+    <ProgressBar label={skill} value={value} />
+  </div>
+);
+
+// Chart Component
+export const Chart = ({ data }) => (
+  <div className="chart">
+    {data.map(([l, v]) => (
+      <div key={l}>
+        <i
+          style={{
+            height: v + '%',
+            background: col(v)
+          }}
+        >
+          <b>{v}%</b>
+        </i>
+        <small>{l}</small>
+      </div>
+    ))}
+  </div>
+);
+
+// Data Table Component
+export const DataTable = ({ cols, rows, onRow }) => (
+  <div className="tw">
+    <table>
+      <thead>
+        <tr>
+          {cols.map((c) => (
+            <th key={c}>{c}</th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {rows.map((r, i) => (
+          <tr
+            key={i}
+            onClick={onRow && (() => onRow(i))}
+            className={onRow ? 'click' : ''}
+          >
+            {r.map((c, j) => (
+              <td key={j} data-l={cols[j]}>
+                {c}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+// Modal Component
+export const Modal = ({ title, onClose, children }) => (
+  <div className="mo" onClick={onClose}>
+    <div
+      className="md"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="ch">
+        <h3>{title}</h3>
+        <Button v="ghost" onClick={onClose}>
+          ✕
+        </Button>
+      </div>
+
+      {children}
+    </div>
+  </div>
+);
+
+// Badge Component
+export const Badge = ({ t }) => (
+  <span className={`bd ${t.replace(/\s/g, '')}`}>
+    {t}
+  </span>
+);
+
+// Notification Item Component
+export const NotificationItem = ({ n, onClick }) => (
+  <div
+    className={`ni ${n[3] ? '' : 'unread'}`}
+    onClick={onClick}
+  >
+    <span className="dot" />
+
+    <div>
+      <b>{n[0]}</b>
+      <p>{n[1]}</p>
+    </div>
+
+    <small>{n[2]}</small>
+  </div>
+);
+
+// Assignment Card Component
+export const AssignmentCard = ({ a }) => (
+  <div className="card">
+    <div className="ch">
+      <h4>{a.name}</h4>
+      <Badge t={a.status} />
+    </div>
+
+    <small>
+      {a.skill} · {a.cls}
+    </small>
+
+    <ProgressBar
+      value={a.done}
+      label="Completion"
+    />
+
+    <small>Due {a.due}</small>
+  </div>
+);
+
+// Lesson Card Component
+export const LessonCard = ({ l, active, onClick }) => (
+  <div
+    className={`lc ${active ? 'on' : ''}`}
+    onClick={onClick}
+  >
+    <b>{l.title}</b>
+    <small>{l.desc}</small>
+    <Badge t={l.status} />
+  </div>
+);
+
+// Navbar Component
+export const Navbar = ({ onMenu, user, onLogout }) => (
+  <header className="top">
+    <Button
+      v="ghost"
+      className="burger"
+      onClick={onMenu}
+    >
+      ☰
+    </Button>
+
+    <Link to="/" className="logo">
+      ➕➖ EduReach
+    </Link>
+
+    <span className="sp" />
+
+    <small>
+      {user?.name} ({user?.role})
+    </small>
+
+    <Button v="ghost" onClick={onLogout}>
+      Logout
+    </Button>
+  </header>
+);
+
+// Sidebar Component
+export const Sidebar = ({ items, open, close }) => (
+  <nav className={`side ${open ? 'open' : ''}`}>
+    {items.map(([p, l, i]) => (
+      <NavLink
+        key={p}
+        to={p}
+        onClick={close}
+      >
+        {i} {l}
+      </NavLink>
+    ))}
+  </nav>
+);
