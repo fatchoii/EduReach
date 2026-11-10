@@ -2,53 +2,76 @@
 
 EduReach is a web and mobile LMS for teachers, parents, and students that focuses on addition and subtraction for Grade 3 learners.
 
-## Tech Stack
+## Repository Layout
 
-- React 18 (Create React App)
-- React Router 6
+```
+EduReach/
+├── frontend/    React 18 app (Create React App)
+├── backend/     Spring Boot 3 REST API (Java 21, Maven, MySQL, JWT)
+└── README.md
+```
 
-## Getting Started
+- Backend base package: `com.it342g02.vibecoder.edureach`
+- Maven: groupId `com.it342g02.vibecoder`, artifactId `edureach`
+
+## Running the Backend
+
+Requirements: Java 21 and MySQL (running on port 3306).
+
+1. Copy `backend/.env.example` to `backend/.env` and put your MySQL password in it. This file is ignored by Git.
+2. Start the API from the `backend` folder:
+   ```bash
+   ./mvnw spring-boot:run        # Windows PowerShell: .\mvnw spring-boot:run
+   ```
+3. The API runs at http://localhost:8080. The `edureach_db` database and all tables are created automatically, and demo data is inserted on the first run.
+
+Demo accounts (password `password123`): `teacher@edureach.com`, `parent@edureach.com`, `ana@edureach.com` (student).
+
+## Running the Frontend
 
 ```bash
+cd frontend
 npm install
 npm start
 ```
 
-The app runs at http://localhost:3000. To create a production build, run `npm run build`.
+The app runs at http://localhost:3000.
 
-Demo login: use any email and password. An email containing the word `parent` opens the parent view; any other email opens the teacher view.
-
-## Project Structure
+## Backend Structure
 
 ```
-src/
-├── components/        Reusable UI, one component per file
-│   ├── common/        Button, Card, Modal, Badge, ProgressBar, Chart, DataTable, FormInput, PageHeader
-│   ├── cards/         DashboardCard, SkillCard, AssignmentCard, LessonCard, NotificationItem
-│   ├── layout/        Navbar, Sidebar
-│   └── index.js       Barrel file: import { Button } from './components'
-├── pages/             One file per screen, grouped by user role
-│   ├── public/        Landing, Auth
-│   ├── teacher/       TeacherDashboard, Classes, Lessons, QuestionBank, Assignments,
-│   │                  Submissions, Analytics, Worksheets
-│   ├── parent/        ParentDashboard
-│   ├── shared/        Notifications, Profile
-│   └── index.js
-├── data/              Mock data (one file per entity), to be replaced by the backend API
-├── utils/             Shared helpers (progress colors, skill statistics)
-├── styles/            global.css
-├── App.js             Routes and layout shell
-└── index.js           Entry point
+backend/src/main/java/com/it342g02/vibecoder/edureach/
+├── config/        SecurityConfig (JWT, CORS, role rules), DataSeeder (demo data)
+├── controller/    REST controllers
+├── dto/           Request and response records
+├── entity/        JPA entities (the ERD tables)
+├── exception/     Error handling (JSON error responses)
+├── repository/    Spring Data JPA repositories
+├── security/      JWT service, request filter, user details
+├── service/       Business logic
+└── EduReachApplication.java
 ```
 
-## Features
+## API Overview
 
-- Landing page, login, and registration
-- Teacher: dashboard, classes, lessons, question bank, assignments, submissions and grading, skill analytics, notifications, worksheet generator, profile
-- Parent: dashboard with progress and suggested practice, notifications
+All endpoints are under `/api`. Send the token from login as `Authorization: Bearer <token>`.
+
+| Area | Endpoints |
+|---|---|
+| Auth | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` |
+| Users | `GET /users?role=STUDENT`, `GET/PUT/DELETE /users/{id}` |
+| Courses | `/courses?instructorId=`, `/enrollments?userId=&courseId=` |
+| Content | `/modules?courseId=`, `/lessons?moduleId=`, `/assessments?moduleId=` |
+| Questions | `/questions?assessmentId=&moduleId=` |
+| Submissions | `/submissions?assessmentId=&userId=`, `/submission-answers?submissionId=` |
+| Auto-grading | `POST /assessments/{id}/submit` with `{"answers":[{"questionId":1,"answer":"38"}]}` |
+| Analytics | `GET /courses/{id}/mastery`, `GET /students/{id}/mastery` |
+| Other | `/badges?userId=&courseId=`, `/parent-students?parentId=&studentId=`, `/notifications?userId=` |
+
+Every resource above supports `GET` (list and by id), `POST`, `PUT /{id}` and `DELETE /{id}`. Creating, editing and deleting courses, modules, lessons, assessments, questions, enrollments, submissions, badges and parent links is restricted to teachers.
 
 ## Roadmap
 
-- Spring Boot REST API backend and database
-- Replace mock data in `src/data` with API calls
-- Real authentication
+- Connect the React pages to the API (replace the mock data in `frontend/src/data`)
+- Real authentication in the frontend
+- Deploy the backend so the Vercel site can use it
