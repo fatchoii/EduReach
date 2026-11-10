@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Routes,
   Route,
@@ -10,6 +10,8 @@ import {
 
 import { Navbar, Sidebar } from './components';
 import * as P from './pages';
+import { UNAUTHORIZED_EVENT } from './services/api';
+import { getCurrentUser, logout } from './services/authService';
 
 // Teacher Navigation Items
 const T = [
@@ -40,6 +42,11 @@ function Shell({ user, role, onLogout }) {
     return <Navigate to="/login" />;
   }
 
+  // Send users to their own area if they open another role's pages.
+  if (user.role !== role) {
+    return <Navigate to={user.role === 'Parent' ? '/parent/dashboard' : '/teacher/dashboard'} />;
+  }
+
   return (
     <div className="shell">
       <Navbar
@@ -65,13 +72,24 @@ function Shell({ user, role, onLogout }) {
 
 // Main App Component
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getCurrentUser);
   const nav = useNavigate();
 
   const out = () => {
+    logout();
     setUser(null);
     nav('/');
   };
+
+  // The server rejected our token (expired or invalid): return to the login page.
+  useEffect(() => {
+    const onUnauthorized = () => {
+      setUser(null);
+      nav('/login');
+    };
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+  }, [nav]);
 
   return (
     <Routes>

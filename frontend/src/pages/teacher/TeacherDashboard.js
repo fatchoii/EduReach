@@ -1,79 +1,76 @@
 import React from 'react';
-import {
-  SKILLS,
-  activity,
-  assignments0,
-  students,
-  submissions,
-} from '../../data';
-import {
-  Card,
-  DashboardCard,
-  PageHeader,
-  ProgressBar,
-} from '../../components';
-import { skillAvg } from '../../utils/skillStats';
+import { Card, DashboardCard, PageHeader, ProgressBar } from '../../components';
+import { useAsync } from '../../hooks/useAsync';
+import { getCurrentUser } from '../../services/authService';
+import { loadTeacherDashboard } from '../../services/teacherDashboardService';
 
 export function TeacherDashboard() {
-  const low = students.filter((s) => s.overall < 70);
+  const user = getCurrentUser();
+  const { data, loading, error } = useAsync(() => loadTeacherDashboard(user.id), [user.id]);
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader t="Dashboard" />
+        <p>Loading dashboard...</p>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageHeader t="Dashboard" />
+        <p className="err">{error}</p>
+      </>
+    );
+  }
 
   return (
     <>
       <PageHeader t="Dashboard" />
 
       <div className="grid4">
-        <DashboardCard
-          icon="🎓"
-          label="Total Students"
-          value={students.length}
-        />
-
-        <DashboardCard
-          icon="📝"
-          label="Active Assignments"
-          value={assignments0.filter((a) => a.status === 'Active').length}
-        />
-
-        <DashboardCard
-          icon="⏳"
-          label="Pending Submissions"
-          value={submissions.filter((s) => s.status !== 'Graded').length}
-        />
-
-        <DashboardCard
-          icon="⭐"
-          label="Average Skill Mastery"
-          value={Math.round(
-            skillAvg.reduce((a, b) => a + b[1], 0) / 5
-          ) + '%'}
-        />
+        <DashboardCard icon="🎓" label="Total Students" value={data.studentCount} />
+        <DashboardCard icon="📝" label="Active Assignments" value={data.activeAssignments} />
+        <DashboardCard icon="📥" label="Submissions Received" value={data.submissionCount} />
+        <DashboardCard icon="⭐" label="Average Skill Mastery" value={data.averageMastery + '%'} />
       </div>
 
       <div className="grid2">
         <Card title="Skill Mastery">
-          {skillAvg.map(([s, v]) => (
-            <ProgressBar key={s} label={s} value={v} />
-          ))}
+          {data.skills.length ? (
+            data.skills.map(([s, v]) => <ProgressBar key={s} label={s} value={v} />)
+          ) : (
+            <p>No submissions yet.</p>
+          )}
         </Card>
 
         <Card title="Needs Attention">
-          <ul>
-            {low.map((s) => (
-              <li key={s.id}>
-                <b>{s.name}</b>: weakest in{' '}
-                {SKILLS[s.m.indexOf(Math.min(...s.m))]} ({Math.min(...s.m)}%)
-              </li>
-            ))}
-          </ul>
+          {data.needsAttention.length ? (
+            <ul>
+              {data.needsAttention.map((s) => (
+                <li key={s.id}>
+                  <b>{s.name}</b>: weakest in {s.skill} ({s.score}%)
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No students need attention right now.</p>
+          )}
         </Card>
       </div>
 
       <Card title="Recent Activity">
-        <ul>
-          {activity.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
+        {data.activity.length ? (
+          <ul>
+            {data.activity.map((a) => (
+              <li key={a}>{a}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>No activity yet.</p>
+        )}
       </Card>
     </>
   );

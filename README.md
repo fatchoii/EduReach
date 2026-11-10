@@ -7,7 +7,7 @@ EduReach is a web and mobile LMS for teachers, parents, and students that focuse
 ```
 EduReach/
 ├── frontend/    React 18 app (Create React App)
-├── backend/     Spring Boot 3 REST API (Java 21, Maven, MySQL, JWT)
+├── backend/     Spring Boot 3 REST API (Java 21, Maven, PostgreSQL on Supabase, JWT)
 └── README.md
 ```
 
@@ -16,14 +16,21 @@ EduReach/
 
 ## Running the Backend
 
-Requirements: Java 21 and MySQL (running on port 3306).
+Requirements: Java 21 and a Supabase project (hosted PostgreSQL).
 
-1. Copy `backend/.env.example` to `backend/.env` and put your MySQL password in it. This file is ignored by Git.
-2. Start the API from the `backend` folder:
+1. In Supabase, open the SQL Editor and run `create schema if not exists edureach;` once.
+2. Create `backend/.env` (Git ignores it) with the Session pooler details from Supabase, under Connect:
+   ```
+   DB_URL=jdbc:postgresql://<pooler-host>:5432/postgres?sslmode=require
+   DB_USERNAME=postgres.<project-ref>
+   DB_PASSWORD=<your database password>
+   ```
+   See `backend/.env.example`. Share these values with teammates privately, never in the repository.
+3. Start the API from the `backend` folder:
    ```bash
    ./mvnw spring-boot:run        # Windows PowerShell: .\mvnw spring-boot:run
    ```
-3. The API runs at http://localhost:8080. The `edureach_db` database and all tables are created automatically, and demo data is inserted on the first run.
+4. The API runs at http://localhost:8080. Tables are created automatically in the `edureach` schema, and demo data is inserted on the first run.
 
 Demo accounts (password `password123`): `teacher@edureach.com`, `parent@edureach.com`, `ana@edureach.com` (student).
 
@@ -35,7 +42,22 @@ npm install
 npm start
 ```
 
-The app runs at http://localhost:3000.
+The app runs at http://localhost:3000 and talks to the backend at `http://localhost:8080`. To use another address, copy `frontend/.env.example` to `frontend/.env` and set `REACT_APP_API_URL`. Start the backend first.
+
+Pages already connected to the API: login, registration, and the teacher dashboard. The other pages still use the mock data in `frontend/src/data` and are being connected one by one.
+
+## Frontend Structure
+
+```
+frontend/src/
+├── components/    Reusable UI (common, cards, layout)
+├── pages/         Screens grouped by role (public, teacher, parent, shared)
+├── services/      API client (api.js), login session, one service per feature
+├── hooks/         Shared React hooks (useAsync)
+├── data/          Mock data, being replaced by the API
+├── utils/         Shared helpers
+└── styles/        global.css
+```
 
 ## Backend Structure
 
@@ -72,6 +94,6 @@ Every resource above supports `GET` (list and by id), `POST`, `PUT /{id}` and `D
 
 ## Roadmap
 
-- Connect the React pages to the API (replace the mock data in `frontend/src/data`)
-- Real authentication in the frontend
+- Connect the remaining pages (classes, lessons, question bank, assignments, submissions, analytics, notifications, parent dashboard)
+- Hide correct answers from students
 - Deploy the backend so the Vercel site can use it
