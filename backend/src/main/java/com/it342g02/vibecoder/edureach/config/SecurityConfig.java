@@ -27,11 +27,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /** Only teachers may create, edit or delete these resources. */
-    private static final String[] TEACHER_MANAGED = {
+    /** Only instructors and admins may create, edit or delete these resources. */
+    private static final String[] STAFF_WRITE = {
             "/api/courses/**", "/api/modules/**", "/api/lessons/**", "/api/assessments/**",
             "/api/questions/**", "/api/enrollments/**", "/api/submissions/**",
-            "/api/submission-answers/**", "/api/badges/**", "/api/parent-students/**"
+            "/api/submission-answers/**", "/api/badges/**", "/api/parent-students/**",
+            "/api/live-sessions/**", "/api/lesson-progress/**"
+    };
+
+    /** Only instructors and admins may read these (they contain answers or other learners' data). */
+    private static final String[] STAFF_READ = {
+            "/api/questions/**", "/api/submissions/**", "/api/submission-answers/**",
+            "/api/users/**", "/api/enrollments/**", "/api/lesson-progress/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -53,11 +60,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        // actions every signed-in user may do
                         .requestMatchers(HttpMethod.POST, "/api/assessments/*/submit").authenticated()
-                        .requestMatchers(HttpMethod.POST, TEACHER_MANAGED).hasRole("TEACHER")
-                        .requestMatchers(HttpMethod.PUT, TEACHER_MANAGED).hasRole("TEACHER")
-                        .requestMatchers(HttpMethod.DELETE, TEACHER_MANAGED).hasRole("TEACHER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("TEACHER")
+                        .requestMatchers(HttpMethod.POST, "/api/lessons/*/complete").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/assessments/*/take").authenticated()
+                        // admin only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/sync-policy").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/*/role").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                        // instructors and admins
+                        .requestMatchers(HttpMethod.POST, "/api/notifications/run-reminders").hasAnyRole("INSTRUCTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/courses/*/mastery").hasAnyRole("INSTRUCTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, STAFF_READ).hasAnyRole("INSTRUCTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, STAFF_WRITE).hasAnyRole("INSTRUCTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, STAFF_WRITE).hasAnyRole("INSTRUCTOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, STAFF_WRITE).hasAnyRole("INSTRUCTOR", "ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

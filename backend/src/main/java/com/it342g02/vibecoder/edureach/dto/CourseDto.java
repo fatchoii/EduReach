@@ -11,6 +11,7 @@ public record CourseDto(
         String description,
         String category,
         String language,
+        String status,
         LocalDateTime createdAt,
         String instructorName) {
 }

@@ -27,8 +27,8 @@ public class AssessmentController {
     }
 
     @GetMapping
-    public List<AssessmentDto> getAll(@RequestParam(required = false) Long moduleId) {
-        return assessmentService.findAll(moduleId);
+    public List<AssessmentDto> getAll(@RequestParam(required = false) Long moduleId, @RequestParam(required = false) String status) {
+        return assessmentService.findAll(moduleId, status);
     }
 
     @GetMapping("/{id}")

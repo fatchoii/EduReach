@@ -10,6 +10,11 @@ public record SubmissionDto(
         @NotNull(message = "userId is required") Long userId,
         Double score,
         LocalDateTime submittedAt,
+        String status,
+        String feedback,
+        LocalDateTime gradedAt,
+        Long gradedById,
         String userName,
-        String assessmentTitle) {
+        String assessmentTitle,
+        String gradedByName) {
 }

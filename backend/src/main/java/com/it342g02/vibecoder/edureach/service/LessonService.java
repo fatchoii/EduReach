@@ -22,10 +22,14 @@ public class LessonService {
         this.moduleRepository = moduleRepository;
     }
 
-    public List<LessonDto> findAll(Long moduleId) {
+    public List<LessonDto> findAll(Long moduleId, String status) {
         List<Lesson> list;
-        if (moduleId != null) {
+        if (moduleId != null && status != null) {
+            list = lessonRepository.findByModuleIdAndStatus(moduleId, status);
+        } else if (moduleId != null) {
             list = lessonRepository.findByModuleId(moduleId);
+        } else if (status != null) {
+            list = lessonRepository.findByStatus(status);
         } else {
             list = lessonRepository.findAll();
         }
@@ -40,7 +44,8 @@ public class LessonService {
     public LessonDto create(LessonDto dto) {
         Lesson entity = new Lesson();
         apply(entity, dto);
-        return toDto(lessonRepository.save(entity));
+        Lesson saved = lessonRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -77,6 +82,9 @@ public class LessonService {
         if (d.instructions() != null) {
             e.setInstructions(d.instructions());
         }
+        if (d.textContent() != null) {
+            e.setTextContent(d.textContent());
+        }
         if (d.contentType() != null) {
             e.setContentType(d.contentType());
         }
@@ -101,6 +109,7 @@ public class LessonService {
                 e.getTitle(),
                 e.getDescription(),
                 e.getInstructions(),
+                e.getTextContent(),
                 e.getContentType(),
                 e.getContentUrl(),
                 e.getDurationMinutes(),

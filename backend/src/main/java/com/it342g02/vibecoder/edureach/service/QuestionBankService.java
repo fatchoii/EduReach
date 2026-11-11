@@ -44,7 +44,8 @@ public class QuestionBankService {
     public QuestionBankDto create(QuestionBankDto dto) {
         QuestionBank entity = new QuestionBank();
         apply(entity, dto);
-        return toDto(questionBankRepository.save(entity));
+        QuestionBank saved = questionBankRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -78,6 +79,9 @@ public class QuestionBankService {
         if (d.questionType() != null) {
             e.setQuestionType(d.questionType());
         }
+        if (d.options() != null) {
+            e.setOptions(d.options());
+        }
         if (d.points() != null) {
             e.setPoints(d.points());
         }
@@ -95,6 +99,7 @@ public class QuestionBankService {
                 e.getAssessment().getId(),
                 e.getQuestionText(),
                 e.getQuestionType(),
+                e.getOptions(),
                 e.getPoints(),
                 e.getCorrectAnswer(),
                 e.getDifficulty(),

@@ -9,6 +9,7 @@ public record LessonDto(
         @NotBlank(message = "title is required") String title,
         String description,
         String instructions,
+        String textContent,
         String contentType,
         String contentUrl,
         Integer durationMinutes,

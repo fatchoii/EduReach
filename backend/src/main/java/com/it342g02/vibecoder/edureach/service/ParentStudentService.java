@@ -44,7 +44,8 @@ public class ParentStudentService {
     public ParentStudentDto create(ParentStudentDto dto) {
         ParentStudent entity = new ParentStudent();
         apply(entity, dto);
-        return toDto(parentStudentRepository.save(entity));
+        ParentStudent saved = parentStudentRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional

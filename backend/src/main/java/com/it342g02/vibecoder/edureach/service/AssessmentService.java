@@ -22,10 +22,14 @@ public class AssessmentService {
         this.moduleRepository = moduleRepository;
     }
 
-    public List<AssessmentDto> findAll(Long moduleId) {
+    public List<AssessmentDto> findAll(Long moduleId, String status) {
         List<Assessment> list;
-        if (moduleId != null) {
+        if (moduleId != null && status != null) {
+            list = assessmentRepository.findByModuleIdAndStatus(moduleId, status);
+        } else if (moduleId != null) {
             list = assessmentRepository.findByModuleId(moduleId);
+        } else if (status != null) {
+            list = assessmentRepository.findByStatus(status);
         } else {
             list = assessmentRepository.findAll();
         }
@@ -40,7 +44,8 @@ public class AssessmentService {
     public AssessmentDto create(AssessmentDto dto) {
         Assessment entity = new Assessment();
         apply(entity, dto);
-        return toDto(assessmentRepository.save(entity));
+        Assessment saved = assessmentRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional

@@ -10,5 +10,6 @@ public record RegisterRequest(
         @NotBlank(message = "fullName is required") String fullName,
         @NotBlank(message = "email is required") @Email(message = "email must be valid") String email,
         @NotBlank(message = "password is required") @Size(min = 6, message = "password must be at least 6 characters") String password,
-        @NotNull(message = "role is required") Role role) {
+        @NotNull(message = "role is required") Role role,
+        String adminCode) {
 }

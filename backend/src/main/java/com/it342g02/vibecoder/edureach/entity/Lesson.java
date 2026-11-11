@@ -2,10 +2,10 @@ package com.it342g02.vibecoder.edureach.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -35,6 +35,9 @@ public class Lesson {
     @Column(columnDefinition = "TEXT")
     private String instructions;
 
+    @Column(columnDefinition = "TEXT")
+    private String textContent;
+
     private String contentType = "TEXT";
 
     @Column(length = 1000)
@@ -43,7 +46,7 @@ public class Lesson {
     private Integer durationMinutes;
 
     @Column(name = "is_downloadable")
-    private Boolean downloadable = false;
+    private Boolean downloadable = true;
 
     private String status = "DRAFT";
 
@@ -85,6 +88,14 @@ public class Lesson {
 
     public void setInstructions(String instructions) {
         this.instructions = instructions;
+    }
+
+    public String getTextContent() {
+        return textContent;
+    }
+
+    public void setTextContent(String textContent) {
+        this.textContent = textContent;
     }
 
     public String getContentType() {
