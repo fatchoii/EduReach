@@ -9,6 +9,8 @@ public record NotificationDto(
         @NotNull(message = "userId is required") Long userId,
         @NotBlank(message = "title is required") String title,
         String message,
+        String type,
+        String refKey,
         Boolean read,
         LocalDateTime createdAt) {
 }

@@ -1,5 +1,6 @@
 package com.it342g02.vibecoder.edureach.controller;
 
+import com.it342g02.vibecoder.edureach.dto.RoleChangeRequest;
 import com.it342g02.vibecoder.edureach.dto.UserDto;
 import com.it342g02.vibecoder.edureach.entity.Role;
 import com.it342g02.vibecoder.edureach.service.UserService;
@@ -40,6 +41,11 @@ public class UserController {
     @PutMapping("/{id}")
     public UserDto update(@PathVariable Long id, @Valid @RequestBody UserDto dto, Authentication authentication) {
         return userService.update(id, dto, authentication);
+    }
+
+    @PutMapping("/{id}/role")
+    public UserDto changeRole(@PathVariable Long id, @Valid @RequestBody RoleChangeRequest request) {
+        return userService.changeRole(id, request.role());
     }
 
     @DeleteMapping("/{id}")

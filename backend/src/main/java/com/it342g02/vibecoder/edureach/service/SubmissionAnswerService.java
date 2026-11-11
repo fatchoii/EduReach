@@ -44,7 +44,8 @@ public class SubmissionAnswerService {
     public SubmissionAnswerDto create(SubmissionAnswerDto dto) {
         SubmissionAnswer entity = new SubmissionAnswer();
         apply(entity, dto);
-        return toDto(submissionAnswerRepository.save(entity));
+        SubmissionAnswer saved = submissionAnswerRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -91,6 +92,7 @@ public class SubmissionAnswerService {
                 e.getQuestion().getId(),
                 e.getStudentAnswer(),
                 e.getCorrect(),
-                e.getQuestion().getQuestionText());
+                e.getQuestion().getQuestionText(),
+                e.getQuestion().getCorrectAnswer());
     }
 }

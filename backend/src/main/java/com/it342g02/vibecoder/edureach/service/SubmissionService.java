@@ -48,7 +48,8 @@ public class SubmissionService {
     public SubmissionDto create(SubmissionDto dto) {
         Submission entity = new Submission();
         apply(entity, dto);
-        return toDto(submissionRepository.save(entity));
+        Submission saved = submissionRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -86,6 +87,19 @@ public class SubmissionService {
         if (d.submittedAt() != null) {
             e.setSubmittedAt(d.submittedAt());
         }
+        if (d.status() != null) {
+            e.setStatus(d.status());
+        }
+        if (d.feedback() != null) {
+            e.setFeedback(d.feedback());
+        }
+        if (d.gradedAt() != null) {
+            e.setGradedAt(d.gradedAt());
+        }
+        if (d.gradedById() != null) {
+            e.setGradedBy(userRepository.findById(d.gradedById())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + d.gradedById())));
+        }
     }
 
     private SubmissionDto toDto(Submission e) {
@@ -95,7 +109,12 @@ public class SubmissionService {
                 e.getUser().getId(),
                 e.getScore(),
                 e.getSubmittedAt(),
+                e.getStatus(),
+                e.getFeedback(),
+                e.getGradedAt(),
+                e.getGradedBy() == null ? null : e.getGradedBy().getId(),
                 e.getUser().getFullName(),
-                e.getAssessment().getTitle());
+                e.getAssessment().getTitle(),
+                e.getGradedBy() == null ? null : e.getGradedBy().getFullName());
     }
 }

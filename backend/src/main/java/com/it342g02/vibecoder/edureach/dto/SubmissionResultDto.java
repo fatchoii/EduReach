@@ -9,5 +9,6 @@ public record SubmissionResultDto(
         boolean passed,
         int correctCount,
         int totalQuestions,
+        String status,
         List<AnswerResultDto> answers) {
 }

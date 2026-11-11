@@ -8,6 +8,7 @@ public record QuestionBankDto(
         @NotNull(message = "assessmentId is required") Long assessmentId,
         @NotBlank(message = "questionText is required") String questionText,
         String questionType,
+        String options,
         Integer points,
         String correctAnswer,
         String difficulty,

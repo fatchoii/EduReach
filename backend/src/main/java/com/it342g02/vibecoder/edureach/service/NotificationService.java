@@ -40,7 +40,8 @@ public class NotificationService {
     public NotificationDto create(NotificationDto dto) {
         Notification entity = new Notification();
         apply(entity, dto);
-        return toDto(notificationRepository.save(entity));
+        Notification saved = notificationRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -74,6 +75,12 @@ public class NotificationService {
         if (d.message() != null) {
             e.setMessage(d.message());
         }
+        if (d.type() != null) {
+            e.setType(d.type());
+        }
+        if (d.refKey() != null) {
+            e.setRefKey(d.refKey());
+        }
         if (d.read() != null) {
             e.setRead(d.read());
         }
@@ -85,6 +92,8 @@ public class NotificationService {
                 e.getUser().getId(),
                 e.getTitle(),
                 e.getMessage(),
+                e.getType(),
+                e.getRefKey(),
                 e.getRead(),
                 e.getCreatedAt());
     }

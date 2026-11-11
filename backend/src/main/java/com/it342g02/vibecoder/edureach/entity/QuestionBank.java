@@ -2,10 +2,10 @@ package com.it342g02.vibecoder.edureach.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -30,6 +30,9 @@ public class QuestionBank {
     private String questionText;
 
     private String questionType = "FILL_IN";
+
+    @Column(columnDefinition = "TEXT")
+    private String options;
 
     private Integer points = 1;
 
@@ -67,6 +70,14 @@ public class QuestionBank {
 
     public void setQuestionType(String questionType) {
         this.questionType = questionType;
+    }
+
+    public String getOptions() {
+        return options;
+    }
+
+    public void setOptions(String options) {
+        this.options = options;
     }
 
     public Integer getPoints() {

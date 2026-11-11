@@ -27,8 +27,8 @@ public class LessonController {
     }
 
     @GetMapping
-    public List<LessonDto> getAll(@RequestParam(required = false) Long moduleId) {
-        return lessonService.findAll(moduleId);
+    public List<LessonDto> getAll(@RequestParam(required = false) Long moduleId, @RequestParam(required = false) String status) {
+        return lessonService.findAll(moduleId, status);
     }
 
     @GetMapping("/{id}")
