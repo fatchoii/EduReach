@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, FormInput } from '../../components';
+import { homePathFor, login, register } from '../../services/authService';
+
+const ROLES = ['Learner', 'Instructor', 'Admin', 'Parent'];
 
 export function Auth({ mode, onAuth }) {
   const nav = useNavigate();
@@ -10,71 +13,69 @@ export function Auth({ mode, onAuth }) {
     email: '',
     password: '',
     confirm: '',
-    role: 'Teacher',
+    role: 'Learner',
+    adminCode: '',
   });
 
   const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const set = (k) => (e) =>
-    setF({ ...f, [k]: e.target.value });
+  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
-  const go = (e) => {
+  const go = async (e) => {
     e.preventDefault();
+    setErr('');
 
     if (!f.email || !f.password) {
       return setErr('Email and password are required.');
     }
 
-    if (mode === 'register' && f.password !== f.confirm) {
-      return setErr('Passwords do not match.');
+    if (mode === 'register') {
+      if (!f.name.trim()) return setErr('Full name is required.');
+      if (f.password.length < 6) return setErr('Password must be at least 6 characters.');
+      if (f.password !== f.confirm) return setErr('Passwords do not match.');
+      if (f.role === 'Admin' && !f.adminCode.trim()) return setErr('Enter the admin code.');
     }
 
-    const role =
-      mode === 'register'
-        ? f.role
-        : f.email.includes('parent')
-          ? 'Parent'
-          : 'Teacher';
+    setBusy(true);
+    try {
+      const user =
+        mode === 'register'
+          ? await register({ name: f.name, email: f.email, password: f.password, role: f.role, adminCode: f.adminCode })
+          : await login(f.email, f.password);
 
-    onAuth({
-      name: f.name || (role === 'Parent' ? 'Maria Reyes' : 'Ms. Santos'),
-      email: f.email,
-      role,
-    });
-
-    nav(role === 'Parent' ? '/parent/dashboard' : '/teacher/dashboard');
+      onAuth(user);
+      nav(homePathFor(user.role));
+    } catch (ex) {
+      setErr(ex.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <div className="auth">
       <form className="card" onSubmit={go}>
-        <h2>
-          {mode === 'login' ? 'Welcome back' : 'Create account'}
-        </h2>
+        <h2>{mode === 'login' ? 'Welcome back' : 'Create account'}</h2>
 
         {err && <p className="err">{err}</p>}
 
         {mode === 'register' && (
-          <FormInput
-            label="Full Name"
-            value={f.name}
-            onChange={set('name')}
-          />
+          <>
+            <FormInput label="Choose your role">
+              <select value={f.role} onChange={set('role')}>
+                {ROLES.map((r) => (
+                  <option key={r}>{r}</option>
+                ))}
+              </select>
+            </FormInput>
+            <FormInput label="Full Name" value={f.name} onChange={set('name')} />
+          </>
         )}
 
-        <FormInput
-          label="Email"
-          type="email"
-          value={f.email}
-          onChange={set('email')}
-        />
+        <FormInput label="Email" type="email" value={f.email} onChange={set('email')} />
 
-        <FormInput
-          label="Password"
-          type="password"
-          value={f.password}
-          onChange={set('password')}
-        />
+        <FormInput label="Password" type="password" value={f.password} onChange={set('password')} />
 
         {mode === 'register' && (
           <>
@@ -84,29 +85,26 @@ export function Auth({ mode, onAuth }) {
               value={f.confirm}
               onChange={set('confirm')}
             />
-
-            <FormInput label="Role">
-              <select value={f.role} onChange={set('role')}>
-                <option>Teacher</option>
-                <option>Parent</option>
-              </select>
-            </FormInput>
+            {f.role === 'Admin' && (
+              <FormInput label="Admin code" type="password" value={f.adminCode} onChange={set('adminCode')} />
+            )}
           </>
         )}
 
-        <Button>
-          {mode === 'login' ? 'Login' : 'Register'}
+        <Button disabled={busy}>
+          {busy ? 'Please wait...' : mode === 'login' ? 'Login' : 'Register'}
         </Button>
 
         <small>
           {mode === 'login' ? (
             <>
-              No account? <Link to="/register">Register</Link>. Tip: use an
-              email containing "parent" for the parent view.
+              No account? <Link to="/register">Register</Link>. Demo accounts (password password123):
+              learner ana@edureach.com, instructor teacher@edureach.com, admin admin@edureach.com,
+              parent parent@edureach.com.
             </>
           ) : (
             <>
-              Have an account? <Link to="/login">Login</Link>
+              Have an account? <Link to="/login">Login</Link>. One account works on web and mobile.
             </>
           )}
         </small>
