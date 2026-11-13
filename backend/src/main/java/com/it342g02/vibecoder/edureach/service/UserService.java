@@ -35,20 +35,28 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
 
-    /** Teachers can edit anyone; everyone else can only edit their own profile. */
+    /** Admins can edit anyone; everyone else can only edit their own profile. */
     @Transactional
     public UserDto update(Long id, UserDto dto, Authentication authentication) {
         User user = get(id);
-        boolean teacher = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_TEACHER"));
+        boolean admin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         boolean self = authentication.getName().equals(user.getEmail());
-        if (!teacher && !self) {
+        if (!admin && !self) {
             throw new AccessDeniedException("You can only edit your own profile");
         }
         user.setFullName(dto.fullName());
         if (dto.profilePhotoUrl() != null) {
             user.setProfilePhotoUrl(dto.profilePhotoUrl());
         }
+        return toDto(userRepository.save(user));
+    }
+
+    /** Admin only (enforced in SecurityConfig). */
+    @Transactional
+    public UserDto changeRole(Long id, Role role) {
+        User user = get(id);
+        user.setRole(role);
         return toDto(userRepository.save(user));
     }
 

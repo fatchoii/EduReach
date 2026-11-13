@@ -48,7 +48,8 @@ public class UserBadgeService {
     public UserBadgeDto create(UserBadgeDto dto) {
         UserBadge entity = new UserBadge();
         apply(entity, dto);
-        return toDto(userBadgeRepository.save(entity));
+        UserBadge saved = userBadgeRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional

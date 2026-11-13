@@ -22,10 +22,14 @@ public class CourseService {
         this.userRepository = userRepository;
     }
 
-    public List<CourseDto> findAll(Long instructorId) {
+    public List<CourseDto> findAll(Long instructorId, String status) {
         List<Course> list;
-        if (instructorId != null) {
+        if (instructorId != null && status != null) {
+            list = courseRepository.findByInstructorIdAndStatus(instructorId, status);
+        } else if (instructorId != null) {
             list = courseRepository.findByInstructorId(instructorId);
+        } else if (status != null) {
+            list = courseRepository.findByStatus(status);
         } else {
             list = courseRepository.findAll();
         }
@@ -40,7 +44,8 @@ public class CourseService {
     public CourseDto create(CourseDto dto) {
         Course entity = new Course();
         apply(entity, dto);
-        return toDto(courseRepository.save(entity));
+        Course saved = courseRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional
@@ -80,6 +85,9 @@ public class CourseService {
         if (d.language() != null) {
             e.setLanguage(d.language());
         }
+        if (d.status() != null) {
+            e.setStatus(d.status());
+        }
     }
 
     private CourseDto toDto(Course e) {
@@ -90,6 +98,7 @@ public class CourseService {
                 e.getDescription(),
                 e.getCategory(),
                 e.getLanguage(),
+                e.getStatus(),
                 e.getCreatedAt(),
                 e.getInstructor().getFullName());
     }

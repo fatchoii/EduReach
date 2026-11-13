@@ -2,10 +2,10 @@ package com.it342g02.vibecoder.edureach.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -35,6 +35,18 @@ public class Submission {
     private Double score = 0.0;
 
     private LocalDateTime submittedAt = LocalDateTime.now();
+
+    private String status = "GRADED";
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
+    private LocalDateTime gradedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "graded_by_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private User gradedBy;
 
     public Long getId() {
         return id;
@@ -74,6 +86,38 @@ public class Submission {
 
     public void setSubmittedAt(LocalDateTime submittedAt) {
         this.submittedAt = submittedAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public LocalDateTime getGradedAt() {
+        return gradedAt;
+    }
+
+    public void setGradedAt(LocalDateTime gradedAt) {
+        this.gradedAt = gradedAt;
+    }
+
+    public User getGradedBy() {
+        return gradedBy;
+    }
+
+    public void setGradedBy(User gradedBy) {
+        this.gradedBy = gradedBy;
     }
 
 }

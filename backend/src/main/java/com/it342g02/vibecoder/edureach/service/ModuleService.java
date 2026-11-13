@@ -40,7 +40,8 @@ public class ModuleService {
     public ModuleDto create(ModuleDto dto) {
         Module entity = new Module();
         apply(entity, dto);
-        return toDto(moduleRepository.save(entity));
+        Module saved = moduleRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional

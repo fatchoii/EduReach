@@ -48,7 +48,8 @@ public class EnrollmentService {
     public EnrollmentDto create(EnrollmentDto dto) {
         Enrollment entity = new Enrollment();
         apply(entity, dto);
-        return toDto(enrollmentRepository.save(entity));
+        Enrollment saved = enrollmentRepository.save(entity);
+        return toDto(saved);
     }
 
     @Transactional

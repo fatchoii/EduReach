@@ -9,5 +9,6 @@ public record SubmissionAnswerDto(
         @NotNull(message = "questionId is required") Long questionId,
         String studentAnswer,
         Boolean correct,
-        String questionText) {
+        String questionText,
+        String correctAnswer) {
 }
