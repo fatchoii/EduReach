@@ -1,68 +1,76 @@
-
 import React, { useEffect, useState } from 'react';
-import {
-  Routes,
-  Route,
-  Navigate,
-  Outlet,
-  useNavigate
-} from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom';
 
-import { Navbar, Sidebar } from './components';
+import { Navbar, OfflineBanner, Sidebar } from './components';
+import { useAutoSync } from './hooks/useOfflineQueue';
+import { useUnread } from './hooks/useUnread';
 import * as P from './pages';
 import { UNAUTHORIZED_EVENT } from './services/api';
-import { getCurrentUser, logout } from './services/authService';
+import { getCurrentUser, homePathFor, logout } from './services/authService';
 
-// Teacher Navigation Items
-const T = [
-  ['dashboard', 'Dashboard', '🏠'],
-  ['classes', 'Classes', '🏫'],
-  ['lessons', 'Lessons', '📖'],
-  ['question-bank', 'Question Bank', '❓'],
-  ['assignments', 'Assignments', '📝'],
-  ['submissions', 'Submissions', '📥'],
-  ['analytics', 'Skill Analytics', '📊'],
-  ['notifications', 'Notifications', '🔔'],
-  ['worksheets', 'Worksheets', '🖨️'],
-  ['profile', 'Profile', '👤'],
-  ['settings', 'Settings', '⚙️']
-].map(([p, l, i]) => ['/teacher/' + p, l, i]);
+// Sidebar menu for each role
+const NAV = {
+  Learner: [
+    ['/learner/dashboard', 'My learning', '🏠'],
+    ['/learner/offline', 'Offline and sync', '⬇️'],
+    ['/learner/notifications', 'Notifications', '🔔'],
+    ['/learner/profile', 'Profile', '👤'],
+  ],
+  Instructor: [
+    ['/instructor/dashboard', 'Dashboard', '🏠'],
+    ['/instructor/courses', 'Courses', '📚'],
+    ['/instructor/gradebook', 'Gradebook', '📝'],
+    ['/instructor/notifications', 'Notifications', '🔔'],
+    ['/instructor/profile', 'Profile', '👤'],
+  ],
+  Admin: [
+    ['/admin/dashboard', 'Dashboard', '🏠'],
+    ['/admin/users', 'Users and roles', '👥'],
+    ['/admin/sync', 'Sync monitor', '🔄'],
+    ['/instructor/courses', 'Courses', '📚'],
+    ['/instructor/gradebook', 'Gradebook', '📝'],
+    ['/admin/notifications', 'Notifications', '🔔'],
+    ['/admin/profile', 'Profile', '👤'],
+  ],
+  Parent: [
+    ['/parent/dashboard', 'My children', '🏠'],
+    ['/parent/notifications', 'Notifications', '🔔'],
+    ['/parent/profile', 'Profile', '👤'],
+  ],
+};
 
-// Parent Navigation Items
-const PA = [
-  ['/parent/dashboard', 'Dashboard', '🏠'],
-  ['/parent/notifications', 'Notifications', '🔔']
-];
+const notificationsPath = (role) => NAV[role].find(([, label]) => label === 'Notifications')[0];
 
-// Main Layout Component
-function Shell({ user, role, onLogout }) {
-  const [o, setO] = useState(false);
+// Main layout: top bar, role menu, page content
+function Shell({ user, roles, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const unread = useUnread(!!user);
+  useAutoSync(!!user && user.role === 'Learner');
 
   if (!user) {
     return <Navigate to="/login" />;
   }
 
   // Send users to their own area if they open another role's pages.
-  if (user.role !== role) {
-    return <Navigate to={user.role === 'Parent' ? '/parent/dashboard' : '/teacher/dashboard'} />;
+  if (!roles.includes(user.role)) {
+    return <Navigate to={homePathFor(user.role)} />;
   }
 
   return (
     <div className="shell">
       <Navbar
         user={user}
-        onMenu={() => setO(!o)}
+        onMenu={() => setOpen(!open)}
         onLogout={onLogout}
+        unread={unread}
+        notificationsPath={notificationsPath(user.role)}
       />
 
       <div className="body">
-        <Sidebar
-          items={role === 'Teacher' ? T : PA}
-          open={o}
-          close={() => setO(false)}
-        />
+        <Sidebar items={NAV[user.role]} open={open} close={() => setOpen(false)} />
 
         <main>
+          {user.role === 'Learner' && <OfflineBanner />}
           <Outlet />
         </main>
       </div>
@@ -70,7 +78,6 @@ function Shell({ user, role, onLogout }) {
   );
 }
 
-// Main App Component
 export default function App() {
   const [user, setUser] = useState(getCurrentUser);
   const nav = useNavigate();
@@ -91,70 +98,53 @@ export default function App() {
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
   }, [nav]);
 
+  const shell = (roles) => <Shell user={user} roles={roles} onLogout={out} />;
+
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public */}
       <Route path="/" element={<P.Landing />} />
+      <Route path="/login" element={<P.Auth mode="login" onAuth={setUser} />} />
+      <Route path="/register" element={<P.Auth mode="register" onAuth={setUser} />} />
 
-      <Route
-        path="/login"
-        element={<P.Auth mode="login" onAuth={setUser} />}
-      />
-
-      <Route
-        path="/register"
-        element={<P.Auth mode="register" onAuth={setUser} />}
-      />
-
-      {/* Teacher Routes */}
-      <Route
-        path="/teacher"
-        element={
-          <Shell
-            user={user}
-            role="Teacher"
-            onLogout={out}
-          />
-        }
-      >
-        <Route path="dashboard" element={<P.TDash />} />
-        <Route path="classes" element={<P.Classes />} />
-        <Route path="lessons" element={<P.Lessons />} />
-        <Route path="question-bank" element={<P.QBank />} />
-        <Route path="assignments" element={<P.Assignments />} />
-        <Route path="submissions" element={<P.Submissions />} />
-        <Route path="analytics" element={<P.Analytics />} />
-
-        <Route
-          path="notifications"
-          element={<P.Notifications role="teacher" />}
-        />
-
-        <Route path="worksheets" element={<P.Worksheets />} />
+      {/* Learner */}
+      <Route path="/learner" element={shell(['Learner'])}>
+        <Route path="dashboard" element={<P.LearnerDashboard />} />
+        <Route path="courses/:courseId" element={<P.LearnerCourse />} />
+        <Route path="quiz/:assessmentId" element={<P.LearnerQuiz />} />
+        <Route path="offline" element={<P.LearnerOffline />} />
+        <Route path="offline/:courseId" element={<P.OfflineCourse />} />
+        <Route path="offline/:courseId/quiz/:assessmentId" element={<P.OfflineQuiz />} />
+        <Route path="notifications" element={<P.Notifications />} />
         <Route path="profile" element={<P.Profile user={user} />} />
-        <Route path="settings" element={<P.Profile user={user} />} />
       </Route>
 
-      {/* Parent Routes */}
-      <Route
-        path="/parent"
-        element={
-          <Shell
-            user={user}
-            role="Parent"
-            onLogout={out}
-          />
-        }
-      >
-        <Route path="dashboard" element={<P.PDash />} />
-
-        <Route
-          path="notifications"
-          element={<P.Notifications role="parent" />}
-        />
+      {/* Instructor (admins can use these pages too) */}
+      <Route path="/instructor" element={shell(['Instructor', 'Admin'])}>
+        <Route path="dashboard" element={<P.InstructorDashboard />} />
+        <Route path="courses" element={<P.Courses />} />
+        <Route path="courses/:courseId" element={<P.CourseBuilder />} />
+        <Route path="gradebook" element={<P.Gradebook />} />
+        <Route path="notifications" element={<P.Notifications />} />
+        <Route path="profile" element={<P.Profile user={user} />} />
       </Route>
 
-      {/* Fallback Route */}
+      {/* Admin */}
+      <Route path="/admin" element={shell(['Admin'])}>
+        <Route path="dashboard" element={<P.AdminDashboard />} />
+        <Route path="users" element={<P.AdminUsers />} />
+        <Route path="sync" element={<P.AdminSync />} />
+        <Route path="notifications" element={<P.Notifications />} />
+        <Route path="profile" element={<P.Profile user={user} />} />
+      </Route>
+
+      {/* Parent */}
+      <Route path="/parent" element={shell(['Parent'])}>
+        <Route path="dashboard" element={<P.ParentDashboard />} />
+        <Route path="notifications" element={<P.Notifications />} />
+        <Route path="profile" element={<P.Profile user={user} />} />
+      </Route>
+
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );

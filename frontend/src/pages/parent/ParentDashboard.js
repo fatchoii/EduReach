@@ -1,43 +1,51 @@
 import React from 'react';
-import { SKILLS } from '../../data';
 import { Card, PageHeader, ProgressBar } from '../../components';
+import { useAsync } from '../../hooks/useAsync';
+import { getCurrentUser } from '../../services/authService';
+import { loadParentDashboard } from '../../services/parentService';
 
 export function ParentDashboard() {
-  const m = [90, 72, 85, 65, 60];
-  const o = Math.round(m.reduce((a, b) => a + b) / 5);
-  const w = m.indexOf(Math.min(...m));
+  const user = getCurrentUser();
+  const { data, loading, error } = useAsync(() => loadParentDashboard(user.id), [user.id], { refreshMs: 20000 });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="err">{error}</p>;
 
   return (
     <>
-      <PageHeader t="Ana Reyes" />
-
-      <div className="grid2">
-        <Card title="Overall Mastery">
-          <div className="big">{o}%</div>
-          <ProgressBar value={o} />
-        </Card>
-
-        <Card title="Suggested Practice">
-          <p>
-            Your child may benefit from additional practice with{' '}
-            {SKILLS[w].toLowerCase()}. Try 10 minutes a day using a number line.
-          </p>
-        </Card>
-      </div>
-
-      <Card title="Skill Progress">
-        {SKILLS.map((s, i) => (
-          <ProgressBar key={s} label={s} value={m[i]} />
-        ))}
-      </Card>
-
-      <Card title="Recent Activity">
-        <ul>
-          <li>Completed Regrouping Practice 1 (4/4)</li>
-          <li>Started Borrowing Basics</li>
-          <li>Earned "Addition Star" badge</li>
-        </ul>
-      </Card>
+      <PageHeader t="My children" />
+      {data.length === 0 && <p className="muted">No child is linked to your account yet. Ask the instructor to link one.</p>}
+      {data.map((child) => {
+        const scored = child.mastery.skills.filter((s) => s.attempts > 0);
+        const weakest = scored.length ? scored.reduce((low, cur) => (cur.score < low.score ? cur : low)) : null;
+        return (
+          <div key={child.studentId}>
+            <h3>{child.studentName}</h3>
+            <div className="grid2">
+              <Card title="Overall mastery">
+                <div className="big">{Math.round(child.mastery.overall)}%</div>
+                <ProgressBar value={Math.round(child.mastery.overall)} />
+              </Card>
+              <Card title="Suggested practice">
+                {weakest ? (
+                  <p>
+                    {child.studentName.split(' ')[0]} may benefit from more practice with{' '}
+                    <b>{weakest.moduleTitle.toLowerCase()}</b>. Try 10 minutes a day using a number line.
+                  </p>
+                ) : (
+                  <p className="muted">No quiz results yet.</p>
+                )}
+              </Card>
+            </div>
+            <Card title="Skill progress">
+              {scored.map((s) => (
+                <ProgressBar key={s.moduleId} label={s.moduleTitle} value={Math.round(s.score)} />
+              ))}
+              {scored.length === 0 && <p className="muted">No quiz results yet.</p>}
+            </Card>
+          </div>
+        );
+      })}
     </>
   );
 }
